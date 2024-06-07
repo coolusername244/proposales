@@ -28,6 +28,24 @@ export const checkIsAuthorized = async () => {
   }
 };
 
+export const getSession = async () => {
+  const cookie = cookies();
+  const cookieData = cookie.get('session');
+
+  if (!cookieData) {
+    return redirect('/login?message=No session found');
+  }
+  return JSON.parse(cookieData.value);
+};
+
+export const getBearerToken = (request: Request) => {
+  const value = request.headers.get('Authorization');
+  if (!value) {
+    return null;
+  }
+  return value.split(' ')[1];
+};
+
 export const signOut = async () => {
   'use server';
   const cookieStore = cookies();
@@ -70,6 +88,7 @@ export const signIn = async (formData: FormData) => {
     } = await data.json();
 
     const session = {
+      id: rows[0].id,
       email,
       apiToken: rows[0].api_token,
     };
@@ -109,6 +128,7 @@ export const signUp = async (formData: FormData) => {
     const { rows } = await response.json();
 
     const session = {
+      id: rows[0].id,
       email,
       apiToken: rows[0].api_token,
     };
