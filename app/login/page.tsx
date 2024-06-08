@@ -1,6 +1,4 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
 
 import { SubmitButton } from './submit-button';
 import { signIn, signUp } from '@/helpers';
@@ -10,8 +8,6 @@ export default function Login({
 }: {
   searchParams: { message: string };
 }) {
-
-
   return (
     <div className="flex-1 flex flex-col w-full px-8 sm:max-w-md justify-center gap-2">
       <Link
