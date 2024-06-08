@@ -7,7 +7,7 @@ const RegisterToHotels = async () => {
 
   let data;
   try {
-    const response = await fetch('http://localhost:3000/api/hotels', {
+    const response = await fetch('http://localhost:3000/api/hotels/get-all', {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
