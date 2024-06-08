@@ -39,6 +39,7 @@ export async function POST(request: Request) {
       clientPhoneNumber,
       clientEmail,
       description,
+      totalPrice,
       packages,
     } = body;
 
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
         client_phone_number,
         client_email,
         description_md,
+        total_cost,
         blocks
       )
       VALUES (
@@ -67,6 +69,7 @@ export async function POST(request: Request) {
         ${clientPhoneNumber},
         ${clientEmail},
         ${description},
+        ${totalPrice},
         jsonb_insert('{}', '{packages}', ${JSON.stringify(packages)}, true)
       )
         RETURNING *;

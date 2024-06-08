@@ -1,7 +1,6 @@
 'use client';
-import { redirect } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
 
 type HotelData = {
   id: string;
@@ -29,8 +28,39 @@ const ProposalForm = ({
   const [subtotals, setSubtotals] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
+  const [totalPrice, setTotalPrice] = useState<number>(0);
   const router = useRouter();
+
+  useEffect(() => {
+    const newTotalCost = Object.values(subtotals).reduce(
+      (acc, curr) => acc + curr,
+      0,
+    );
+    setTotalPrice(newTotalCost);
+  }, [subtotals]);
+
+  const handleApiRequest = async (url: string, method: string, body: any) => {
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${userId}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Something went wrong.');
+      }
+    } catch (error) {
+      setError(
+        (error as Error).message ||
+          'Something went wrong. Please try again later.',
+      );
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     setLoading(true);
@@ -43,19 +73,36 @@ const ProposalForm = ({
     const clientPhoneNumber = (e.target as any).clientPhoneNumber.value;
     const clientEmail = (e.target as any).clientEmail.value;
     const description = (e.target as any).description_md.value;
-    const packages = hotelData.services.map(service => {
+    const packages: {
+      name: string;
+      quantity?: number;
+      checked?: boolean;
+      unitPrice?: number;
+      packageTotalPrice: number;
+    }[] = [];
+
+    hotelData.services.forEach(service => {
       if (service.perUnit) {
-        return {
-          name: service.name,
-          quantity: Number((e.target as any)[`${service.name}Quantity`].value),
-          totalPrice: subtotals[service.name],
-        };
+        const quantity = Number(
+          (e.target as any)[`${service.name}Quantity`].value,
+        );
+        if (quantity !== 0) {
+          packages.push({
+            name: service.friendlyName,
+            quantity: quantity,
+            packageTotalPrice: subtotals[service.name],
+            unitPrice: service.price,
+          });
+        }
       } else {
-        return {
-          name: service.name,
-          checked: (e.target as any)[`${service.name}Check`].checked,
-          totalPrice: subtotals[service.name],
-        };
+        const isChecked = (e.target as any)[`${service.name}Check`].checked;
+        if (isChecked) {
+          packages.push({
+            name: service.friendlyName,
+            checked: isChecked,
+            packageTotalPrice: subtotals[service.name],
+          });
+        }
       }
     });
 
@@ -70,29 +117,40 @@ const ProposalForm = ({
       clientEmail,
       description,
       packages,
+      totalPrice,
+    };
+
+    const emailData = {
+      hotelName: hotelData.name,
+      eventTitle,
+      eventDate,
+      amountOfGuests: amountOfGuests,
+      clientCompanyName,
+      clientName,
+      clientEmail,
+      packages,
+      totalPrice,
     };
 
     try {
-      const response = await fetch('http://localhost:3000/api/proposals', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${userId}`,
-        },
-        body: JSON.stringify(proposal),
-      });
+      await Promise.all([
+        handleApiRequest(
+          'http://localhost:3000/api/proposals',
+          'POST',
+          proposal,
+        ),
+        handleApiRequest(
+          'http://localhost:3000/api/email/send-new',
+          'POST',
+          emailData,
+        ),
+      ]);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        setError(
-          errorData.error || 'Something went wrong. Please try again later.',
-        );
-      } else {
-        router.push('/dashboard');
-      }
+      router.push('/dashboard');
+      router.refresh();
     } catch (error) {
+      // Handle errors
       console.error(error);
-      setError('Something went wrong. Please try again later.');
     } finally {
       setLoading(false);
     }
@@ -109,6 +167,10 @@ const ProposalForm = ({
       ...prevSubtotals,
       [service.name]: newSubTotal,
     }));
+
+    setTotalPrice(
+      Object.values(subtotals).reduce((acc, curr) => acc + curr, 0),
+    );
   };
 
   return (
@@ -252,9 +314,7 @@ const ProposalForm = ({
         </div>
         <div>
           <h3 className="text-2xl text-center">Total</h3>
-          <p>
-            {Object.values(subtotals).reduce((acc, curr) => acc + curr, 0)} KR
-          </p>
+          <p>{totalPrice} KR</p>
         </div>
         <input
           className="bg-emerald-500 hover:bg-emerald-800 py-2"

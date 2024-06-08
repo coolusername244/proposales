@@ -47,6 +47,7 @@ const Dashboard = async () => {
       }),
       fetch('http://localhost:3000/api/proposals', {
         method: 'GET',
+        cache: 'no-store',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${id}`,
