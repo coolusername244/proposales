@@ -9,7 +9,8 @@ export async function PUT(request: Request) {
     const { email, password } = body;
 
     const { rows } = await sql`
-      SELECT * FROM users
+      SELECT * 
+      FROM users
       WHERE email = ${email};
     `;
 
