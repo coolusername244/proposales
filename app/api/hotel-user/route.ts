@@ -9,9 +9,15 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // const { rows } = await sql`
+    //   SELECT * FROM hotel_user
+    //   WHERE user_id = ${id};
+    // `;
     const { rows } = await sql`
-      SELECT * FROM hotel_user
-      WHERE user_id = ${id};
+        SELECT hotel_user.*, hotel.name AS hotel_name
+        FROM hotel_user hotel_user
+        INNER JOIN hotel ON hotel_user.hotel_id = hotel.id
+        WHERE user_id = ${id};
     `;
 
     return NextResponse.json({ rows }, { status: 200 });
