@@ -1,7 +1,7 @@
 import { checkIsAuthorized, getSession } from '@/helpers';
 import Link from 'next/link';
 import React from 'react';
-
+export const dynamic = 'force-dynamic';
 const Proposal = async ({ params }: { params: { id: string } }) => {
   await checkIsAuthorized();
   const { id }: { id: string } = await getSession();
