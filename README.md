@@ -86,10 +86,10 @@ CREATE TABLE IF NOT EXISTS hotel_user (
 
 - Error toasts
 - Form validation
-  - At the moment the form is very basic and doesn't have any backend validation. I would like to add some validation to the form to ensure that the user is entering the correct data, using tools such as JOI or Zod.
-- CRUD for hotels
+  - At the moment the form doesn't have any backend validation. I would like to add some validation to ensure that the user is entering the correct data, using tools such as JOI or Zod to create a schema for the form to be tested against. As it stands, the only validation is the required attribute which can easily be removed.
 - Email
   - I would also have included a link to the proposal so the receiver of the email can view the proposal online as well as in the email.
+- CRUD for hotels
 
 <br>
 
