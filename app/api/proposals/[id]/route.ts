@@ -64,7 +64,8 @@ export async function PUT(request: Request) {
         total_cost = ${totalPrice},
         blocks = jsonb_insert('{}', '{packages}', ${JSON.stringify(
           packages,
-        )}, true)
+        )}, true),
+        updated_at = NOW()
       WHERE id = ${proposalId}
       RETURNING *;
     `;
