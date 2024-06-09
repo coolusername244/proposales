@@ -95,7 +95,7 @@ export const signIn = async (formData: FormData) => {
 
     cookieStore.set('session', JSON.stringify(session), {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      // secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 60 * 60,
     });
