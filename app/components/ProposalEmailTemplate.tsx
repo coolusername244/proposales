@@ -1,6 +1,7 @@
 import React from 'react';
 
 type EmailTemplateProps = {
+  update?: boolean;
   hotelName: string;
   eventTitle: string;
   eventDate: string;
@@ -18,7 +19,8 @@ type EmailTemplateProps = {
   }[];
 };
 
-const NewProposalEmailTemplate = ({
+const ProposalEmailTemplate = ({
+  update,
   hotelName,
   eventTitle,
   eventDate,
@@ -31,8 +33,8 @@ const NewProposalEmailTemplate = ({
   <div>
     <h1>Hey there, {clientName}!</h1>
     <p className="text-lg">
-      You are receiving this email because your initial proposal for{' '}
-      {clientCompanyName} is now ready for viewing!
+      You are receiving this email because your {update ? 'updated' : 'initial'}{' '}
+      proposal for {clientCompanyName} is now ready for viewing!
     </p>
     <h2>Proposal Details</h2>
     <p>
@@ -65,4 +67,4 @@ const NewProposalEmailTemplate = ({
     </p>
   </div>
 );
-export default NewProposalEmailTemplate;
+export default ProposalEmailTemplate;

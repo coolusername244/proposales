@@ -10,6 +10,7 @@ const Proposal = async ({ params }: { params: { id: string } }) => {
     `http://localhost:3000/api/proposals/${params.id}`,
     {
       method: 'GET',
+      cache: 'no-store',
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${id}`,
@@ -18,8 +19,6 @@ const Proposal = async ({ params }: { params: { id: string } }) => {
   );
 
   const proposal = (await response.json()).rows[0];
-
-  console.log('proposal', proposal);
 
   return (
     <div className="flex-1 flex flex-col gap-20 w-[60vw] px-3 pt-12 text-white">

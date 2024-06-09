@@ -26,11 +26,14 @@ export async function POST(request: Request) {
       totalPrice,
     } = body;
 
+    const update = true;
+
     const { data, error } = await resend.emails.send({
       from: 'Proposales <onboarding@resend.dev>',
       to: [clientEmail],
-      subject: 'Your new proposal',
+      subject: 'Your updated proposal',
       react: ProposalEmailTemplate({
+        update,
         hotelName,
         eventTitle,
         eventDate,

@@ -17,10 +17,34 @@ type Service = {
   perUnit: boolean;
 };
 
+type ProposalData = {
+  id: string;
+  event_title: string;
+  event_date: string;
+  amount_of_guests: number;
+  client_company_name: string;
+  client_name: string;
+  client_phone_number: string;
+  client_email: string;
+  description_md: string;
+  blocks: {
+    packages: {
+      name: string;
+      quantity?: number;
+      checked?: boolean;
+      unitPrice?: number;
+      packageTotalPrice: number;
+      description?: string;
+    }[];
+  };
+};
+
 const ProposalForm = ({
+  proposalData,
   hotelData,
   userId,
 }: {
+  proposalData?: ProposalData | null;
   hotelData: HotelData;
   userId: string;
 }) => {
@@ -31,6 +55,22 @@ const ProposalForm = ({
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const router = useRouter();
 
+  // if coming from edit proposal, set total values
+  useEffect(() => {
+    if (proposalData) {
+      const initialSubtotals: Record<string, number> = {};
+      proposalData.blocks.packages.forEach(p => {
+        const service = hotelData.services.find(s => s.friendlyName === p.name);
+        if (service) {
+          initialSubtotals[service.name] = p.packageTotalPrice;
+        }
+      });
+      setSubtotals(initialSubtotals);
+      setAmountOfGuests(proposalData.amount_of_guests || 0);
+    }
+  }, []);
+
+  // update total price of proposal on value change
   useEffect(() => {
     const newTotalCost = Object.values(subtotals).reduce(
       (acc, curr) => acc + curr,
@@ -38,6 +78,24 @@ const ProposalForm = ({
     );
     setTotalPrice(newTotalCost);
   }, [subtotals]);
+
+  // update quantity and subtotal on block quantity change
+  const handleQuantityChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    service: Service,
+  ) => {
+    const newQuantity = Number(event.target.value);
+    const newSubTotal = service.perUnit ? newQuantity * service.price : 0;
+
+    setSubtotals(prevSubtotals => ({
+      ...prevSubtotals,
+      [service.name]: newSubTotal,
+    }));
+
+    setTotalPrice(
+      Object.values(subtotals).reduce((acc, curr) => acc + curr, 0),
+    );
+  };
 
   const handleApiRequest = async (url: string, method: string, body: any) => {
     try {
@@ -62,7 +120,7 @@ const ProposalForm = ({
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const addNewProposal = async (e: React.FormEvent<HTMLFormElement>) => {
     setLoading(true);
     setError(null);
     e.preventDefault();
@@ -159,25 +217,109 @@ const ProposalForm = ({
     }
   };
 
-  const handleQuantityChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    service: Service,
-  ) => {
-    const newQuantity = Number(event.target.value);
-    const newSubTotal = service.perUnit ? newQuantity * service.price : 0;
+  const updateProposal = async (e: React.FormEvent<HTMLFormElement>) => {
+    setLoading(true);
+    setError(null);
+    e.preventDefault();
+    const eventTitle = (e.target as any).eventTitle.value;
+    const eventDate = (e.target as any).eventDate.value;
+    const clientCompanyName = (e.target as any).clientCompanyName.value;
+    const clientName = (e.target as any).clientName.value;
+    const clientPhoneNumber = (e.target as any).clientPhoneNumber.value;
+    const clientEmail = (e.target as any).clientEmail.value;
+    const description = (e.target as any).description_md.value;
+    const packages: {
+      name: string;
+      quantity?: number;
+      checked?: boolean;
+      unitPrice?: number;
+      packageTotalPrice: number;
+      description?: string;
+    }[] = [];
 
-    setSubtotals(prevSubtotals => ({
-      ...prevSubtotals,
-      [service.name]: newSubTotal,
-    }));
+    hotelData.services.forEach(service => {
+      if (service.perUnit) {
+        const quantity = Number(
+          (e.target as any)[`${service.name}Quantity`].value,
+        );
+        if (quantity !== 0) {
+          packages.push({
+            name: service.friendlyName,
+            quantity: quantity,
+            packageTotalPrice: subtotals[service.name],
+            unitPrice: service.price,
+            description: service.description,
+          });
+        }
+      } else {
+        const isChecked = (e.target as any)[`${service.name}Check`].checked;
+        if (isChecked) {
+          packages.push({
+            name: service.friendlyName,
+            checked: isChecked,
+            packageTotalPrice: subtotals[service.name],
+            description: service.description,
+          });
+        }
+      }
+    });
 
-    setTotalPrice(
-      Object.values(subtotals).reduce((acc, curr) => acc + curr, 0),
-    );
+    const proposal = {
+      proposalId: proposalData!.id,
+      hotelId: hotelData.id,
+      eventTitle,
+      eventDate,
+      amountOfGuests: amountOfGuests,
+      clientCompanyName,
+      clientName,
+      clientPhoneNumber,
+      clientEmail,
+      description,
+      packages,
+      totalPrice,
+    };
+
+    const emailData = {
+      hotelName: hotelData.name,
+      eventTitle,
+      eventDate,
+      amountOfGuests: amountOfGuests,
+      clientCompanyName,
+      clientName,
+      clientEmail,
+      packages,
+      totalPrice,
+    };
+
+    try {
+      await Promise.all([
+        handleApiRequest(
+          `http://localhost:3000/api/proposals/${proposalData!.id}`,
+          'PUT',
+          proposal,
+        ),
+        handleApiRequest(
+          'http://localhost:3000/api/email/send-update',
+          'POST',
+          emailData,
+        ),
+      ]);
+
+      router.push('/dashboard');
+      router.refresh();
+    } catch (error) {
+      // Handle errors
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form
+      onSubmit={proposalData ? updateProposal : addNewProposal}
+      className="space-y-8"
+    >
       <h3 className="text-white text-center text-2xl">
         Event Location - {hotelData.name}
       </h3>
@@ -191,6 +333,7 @@ const ProposalForm = ({
             type="text"
             className="text-black indent-1"
             required
+            defaultValue={proposalData?.event_title || ''}
           />
         </div>
         <div className="flex flex-col">
@@ -202,6 +345,7 @@ const ProposalForm = ({
             type="date"
             className="text-black indent-1"
             required
+            defaultValue={proposalData?.event_date}
           />
         </div>
         <div className="flex flex-col">
@@ -215,6 +359,7 @@ const ProposalForm = ({
             min={1}
             onChange={e => setAmountOfGuests(Number(e.target.value))}
             required
+            defaultValue={proposalData?.amount_of_guests}
           />
         </div>
         <div className="flex flex-col">
@@ -226,6 +371,7 @@ const ProposalForm = ({
             type="text"
             className="text-black indent-2"
             required
+            defaultValue={proposalData?.client_company_name}
           />
         </div>
         <div className="flex flex-col">
@@ -237,6 +383,7 @@ const ProposalForm = ({
             type="text"
             className="text-black indent-2"
             required
+            defaultValue={proposalData?.client_name}
           />
         </div>
         <div className="flex flex-col">
@@ -248,6 +395,7 @@ const ProposalForm = ({
             type="tel"
             className="text-black indent-2"
             required
+            defaultValue={proposalData?.client_phone_number}
           />
         </div>
         <div className="flex flex-col">
@@ -260,6 +408,7 @@ const ProposalForm = ({
             type="email"
             className="text-black indent-2"
             required
+            defaultValue={proposalData?.client_email}
           />
         </div>
         <div className="flex flex-col">
@@ -269,6 +418,7 @@ const ProposalForm = ({
             className="text-black px-2 py-1"
             rows={10}
             required
+            defaultValue={proposalData?.description_md}
           />
         </div>
         <div className="flex flex-col">
@@ -290,7 +440,13 @@ const ProposalForm = ({
                     onChange={e => handleQuantityChange(e, service)}
                     className="w-full text-black indent-2"
                     required
+                    defaultValue={
+                      proposalData?.blocks.packages.find(
+                        p => p.name === service.friendlyName,
+                      )?.quantity || 0
+                    }
                   />
+
                   <p>
                     Sub Total:{' '}
                     <span id={`${service.name}Subtotal`}>
@@ -302,6 +458,11 @@ const ProposalForm = ({
                 <input
                   id={`${service.name}Check`}
                   type="checkbox"
+                  defaultChecked={
+                    proposalData?.blocks.packages.find(
+                      p => p.name === service.friendlyName,
+                    )?.checked
+                  }
                   onChange={e => {
                     const isChecked = (e.target as HTMLInputElement).checked;
 
