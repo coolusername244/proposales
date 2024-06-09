@@ -82,6 +82,17 @@ CREATE TABLE IF NOT EXISTS hotel_user (
 
 <br>
 
+### Things I would still like to implement
+
+- Error toasts
+- Form validation
+  - At the moment the form is very basic and doesn't have any backend validation. I would like to add some validation to the form to ensure that the user is entering the correct data, using tools such as JOI or Zod.
+- CRUD for hotels
+- Email
+  - I would also have included a link to the proposal so the receiver of the email can view the proposal online as well as in the email.
+
+<br>
+
 ### Thought Processes
 
 - Firstly, it took me some time to understand what a block is, even after looking at [this](https://docs.proposales.com/api-reference/entities/block), I still wasn't too sure. However I created a basic array similar to ["catering", "spa", "confrence room"] to represent the blocks in the database and decided to come back to it when the time came. Once that time came I looked through the website for an example and came across [this video](https://cdn.prod.website-files.com/64fa70d89846f59218c2ffad/650b9750a2425df7026c47dd_mobile%20scroll_optimized-transcode.mp4) i assumed to be blocks. I then created this (where 'services' are the blocks that the hotel offers):
