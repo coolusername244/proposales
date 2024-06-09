@@ -79,6 +79,7 @@ const ProposalForm = ({
       checked?: boolean;
       unitPrice?: number;
       packageTotalPrice: number;
+      description?: string;
     }[] = [];
 
     hotelData.services.forEach(service => {
@@ -92,6 +93,7 @@ const ProposalForm = ({
             quantity: quantity,
             packageTotalPrice: subtotals[service.name],
             unitPrice: service.price,
+            description: service.description,
           });
         }
       } else {
@@ -101,6 +103,7 @@ const ProposalForm = ({
             name: service.friendlyName,
             checked: isChecked,
             packageTotalPrice: subtotals[service.name],
+            description: service.description,
           });
         }
       }
