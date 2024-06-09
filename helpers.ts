@@ -52,7 +52,7 @@ export const signOut = async () => {
   const response = cookieStore.get('session');
   const { email }: CookieValues = JSON.parse(response!.value);
 
-  await fetch('http://localhost:3000/api/users/signout', {
+  await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/signout`, {
     method: 'PUT',
     body: JSON.stringify({ email }),
     headers: {
@@ -76,13 +76,16 @@ export const signIn = async (formData: FormData) => {
   }
 
   try {
-    const data = await fetch('http://localhost:3000/api/users/login', {
-      method: 'PUT',
-      body: JSON.stringify({ email, password }),
-      headers: {
-        'Content-Type': 'application/json',
+    const data = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/users/login`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ email, password }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
-    });
+    );
     const {
       response: { rows },
     } = await data.json();
@@ -94,7 +97,7 @@ export const signIn = async (formData: FormData) => {
     };
 
     cookieStore.set('session', JSON.stringify(session), {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
       maxAge: 60 * 60,
@@ -118,13 +121,16 @@ export const signUp = async (formData: FormData) => {
   }
 
   try {
-    const response = await fetch('http://localhost:3000/api/users/signup', {
-      method: 'POST',
-      body: JSON.stringify({ email, password }),
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/users/signup`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ email, password }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
-    });
+    );
     const { rows } = await response.json();
 
     const session = {
