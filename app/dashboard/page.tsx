@@ -29,8 +29,6 @@ type ProposalResponse = {
   client_phone_number: string;
 }[];
 
-export const dynamic = 'force-dynamic';
-
 const Dashboard = async () => {
   await checkIsAuthorized();
   const { id }: { id: string } = await getSession();
