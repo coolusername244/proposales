@@ -7,7 +7,7 @@ const Proposal = async ({ params }: { params: { id: string } }) => {
   const { id }: { id: string } = await getSession();
 
   const response = await fetch(
-    `http://localhost:3000/api/proposals/${params.id}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/proposals/${params.id}`,
     {
       method: 'GET',
       cache: 'no-store',

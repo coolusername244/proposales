@@ -11,7 +11,7 @@ const CreateNewProposal = async ({
 }) => {
   const { id } = await getSession();
   const response = await fetch(
-    `http://localhost:3000/api/hotels/${searchParams.hotelId}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/hotels/${searchParams.hotelId}`,
     {
       method: 'GET',
       headers: {

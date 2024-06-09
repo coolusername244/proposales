@@ -28,13 +28,16 @@ const RegisterForm = ({
     const hotelIds = Array.from(formData.keys());
 
     try {
-      const response = await fetch('http://localhost:3000/api/hotel-user', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/hotel-user`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ hotelIds, userId }),
         },
-        body: JSON.stringify({ hotelIds, userId }),
-      });
+      );
 
       if (response.ok) {
         location.reload();

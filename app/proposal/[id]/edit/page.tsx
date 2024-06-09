@@ -7,7 +7,7 @@ import ProposalForm from '@/app/components/ProposalForm';
 const EditProposal = async ({ params }: { params: { id: string } }) => {
   const { id } = await getSession();
   const proposalResponse = await fetch(
-    `http://localhost:3000/api/proposals/${params.id}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/proposals/${params.id}`,
     {
       method: 'GET',
       headers: {
@@ -21,7 +21,7 @@ const EditProposal = async ({ params }: { params: { id: string } }) => {
   const proposalData = rows[0];
 
   const hotelDataResponse = await fetch(
-    `http://localhost:3000/api/hotels/${proposalData.hotel_id}`,
+    `${process.env.NEXT_PUBLIC_API_URL}/api/hotels/${proposalData.hotel_id}`,
     {
       method: 'GET',
       headers: {

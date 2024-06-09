@@ -38,14 +38,14 @@ const Dashboard = async () => {
 
   try {
     const [hotelUsersResponse, proposalResponse] = await Promise.all([
-      fetch('http://localhost:3000/api/hotel-user', {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/hotel-user`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${id}`,
         },
       }),
-      fetch('http://localhost:3000/api/proposals', {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/proposals`, {
         method: 'GET',
         cache: 'no-store',
         headers: {

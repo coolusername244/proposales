@@ -7,12 +7,15 @@ const RegisterToHotels = async () => {
 
   let data;
   try {
-    const response = await fetch('http://localhost:3000/api/hotels/get-all', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/hotels/get-all`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       },
-    });
+    );
     data = await response.json();
   } catch (error) {
     console.error('error', error);

@@ -196,12 +196,12 @@ const ProposalForm = ({
     try {
       await Promise.all([
         handleApiRequest(
-          'http://localhost:3000/api/proposals',
+          `${process.env.NEXT_PUBLIC_API_URL}/api/proposals`,
           'POST',
           proposal,
         ),
         handleApiRequest(
-          'http://localhost:3000/api/email/send-new',
+          `${process.env.NEXT_PUBLIC_API_URL}/api/email/send-new`,
           'POST',
           emailData,
         ),
@@ -294,12 +294,14 @@ const ProposalForm = ({
     try {
       await Promise.all([
         handleApiRequest(
-          `http://localhost:3000/api/proposals/${proposalData!.id}`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/proposals/${
+            proposalData!.id
+          }`,
           'PUT',
           proposal,
         ),
         handleApiRequest(
-          'http://localhost:3000/api/email/send-update',
+          `${process.env.NEXT_PUBLIC_API_URL}/api/email/send-update`,
           'POST',
           emailData,
         ),
