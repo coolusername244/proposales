@@ -1,5 +1,6 @@
 import { getBearerToken } from '@/helpers';
 import { sql } from '@vercel/postgres';
+import { revalidatePath } from 'next/cache';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -70,6 +71,7 @@ export async function PUT(request: Request) {
       RETURNING *;
     `;
 
+    revalidatePath('/', 'layout');
     return NextResponse.json({ rows }, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error }, { status: 500 });
